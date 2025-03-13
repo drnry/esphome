@@ -19,6 +19,9 @@ enum ENUMPollingCommand {
   POLLING_QPIWS = 4,
   POLLING_QT = 5,
   POLLING_QMN = 6,
+  POLLING_17GS = 7,
+  POLLING_ET = 8,
+  POLLING_PS = 9,
 };
 struct PollingCommand {
   uint8_t *command;
@@ -52,6 +55,8 @@ struct PollingCommand {
 #define PIPSOLAR_TEXT_SENSOR(name, polling_command) PIPSOLAR_ENTITY_(text_sensor::TextSensor, name, polling_command)
 
 class Pipsolar : public uart::UARTDevice, public PollingComponent {
+  // ET total generated energy
+  PIPSOLAR_SENSOR(energy, ET, int);
   // QPIGS values
   PIPSOLAR_SENSOR(grid_voltage, QPIGS, float)
   PIPSOLAR_SENSOR(grid_frequency, QPIGS, float)
@@ -186,7 +191,7 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   void update() override;
 
  protected:
-  static const size_t PIPSOLAR_READ_BUFFER_LENGTH = 110;  // maximum supported answer length
+  static const size_t PIPSOLAR_READ_BUFFER_LENGTH = 255;  // maximum supported answer length
   static const size_t COMMAND_QUEUE_LENGTH = 10;
   static const size_t COMMAND_TIMEOUT = 5000;
   uint32_t last_poll_ = 0;

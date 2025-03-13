@@ -1,23 +1,27 @@
 import esphome.codegen as cg
-import esphome.config_validation as cv
 from esphome.components import sensor
+import esphome.config_validation as cv
 from esphome.const import (
+    CONF_BATTERY_VOLTAGE,
+    CONF_BUS_VOLTAGE,
     DEVICE_CLASS_CURRENT,
+    DEVICE_CLASS_ENERGY,
     DEVICE_CLASS_POWER,
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_VOLTAGE,
     ICON_CURRENT_AC,
+    STATE_CLASS_TOTAL_INCREASING,
     UNIT_AMPERE,
     UNIT_CELSIUS,
     UNIT_HERTZ,
+    UNIT_KILOWATT_HOURS,
     UNIT_PERCENT,
     UNIT_VOLT,
     UNIT_VOLT_AMPS,
     UNIT_WATT,
-    CONF_BUS_VOLTAGE,
-    CONF_BATTERY_VOLTAGE,
 )
-from .. import PIPSOLAR_COMPONENT_SCHEMA, CONF_PIPSOLAR_ID
+
+from .. import CONF_PIPSOLAR_ID, PIPSOLAR_COMPONENT_SCHEMA
 
 DEPENDENCIES = ["uart"]
 
@@ -68,6 +72,7 @@ CONF_SCC_FIRMWARE_VERSION = "scc_firmware_version"
 CONF_BATTERY_VOLTAGE_OFFSET_FOR_FANS_ON = "battery_voltage_offset_for_fans_on"
 CONF_EEPROM_VERSION = "eeprom_version"
 CONF_PV_CHARGING_POWER = "pv_charging_power"
+CONF_ENERGY = "energy"
 
 TYPES = {
     CONF_GRID_RATING_VOLTAGE: sensor.sensor_schema(
@@ -261,6 +266,11 @@ TYPES = {
         unit_of_measurement=UNIT_WATT,
         accuracy_decimals=1,
         device_class=DEVICE_CLASS_POWER,
+    ),
+    CONF_ENERGY: sensor.sensor_schema(
+        unit_of_measurement=UNIT_KILOWATT_HOURS,
+        device_class=DEVICE_CLASS_ENERGY,
+        state_class=STATE_CLASS_TOTAL_INCREASING,
     ),
 }
 

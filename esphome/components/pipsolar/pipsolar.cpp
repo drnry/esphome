@@ -173,7 +173,14 @@ void Pipsolar::loop() {
         }
         this->state_ = STATE_IDLE;
         break;
+      case POLLING_ET:
+        if (this->energy_) {
+          this->energy_->publish_state(value_energy_);
+        }
+        this->state_ = STATE_IDLE;
+        break;
       case POLLING_QPIGS:
+      case POLLING_17GS:
         if (this->grid_voltage_) {
           this->grid_voltage_->publish_state(value_grid_voltage_);
         }
@@ -693,6 +700,42 @@ void Pipsolar::loop() {
         }
         this->state_ = STATE_POLL_DECODED;
         break;
+      case POLLING_17GS: {
+        ESP_LOGD(TAG, "Decode POLLING_17GS %s", tmp);
+        char *string, *found;
+        string = tmp + 5;  // skip header
+        int i = 1;
+        while ((found = strsep(&string, ",")) != NULL) {
+          switch (i) {
+            case 22:
+              value_inverter_heat_sink_temperature_ = atoi(found);
+              break;
+            default:
+              break;
+          }
+          // ESP_LOGD(TAG, "parsing %i=%i",i,atoi(found));
+          i++;
+        }
+        this->state_ = STATE_POLL_DECODED;
+      } break;
+      case POLLING_ET: {
+        ESP_LOGD(TAG, "Decode ET %s", tmp);
+        char *string, *found;
+        string = tmp + 5;  // skip header
+        int i = 1;
+        while ((found = strsep(&string, ",")) != NULL) {
+          switch (i) {
+            case 1:
+              value_energy_ = atoi(found);
+              break;
+            default:
+              break;
+          }
+          // ESP_LOGD(TAG, "parsing %i=%i",i,atoi(found));
+          i++;
+        }
+        this->state_ = STATE_POLL_DECODED;
+      } break;
       default:
         this->state_ = STATE_IDLE;
         break;
@@ -833,10 +876,10 @@ void Pipsolar::send_next_poll_() {
   this->write_array(this->used_polling_commands_[this->last_polling_command_].command,
                     this->used_polling_commands_[this->last_polling_command_].length);
   // checksum
-  this->write(((uint8_t) ((crc16) >> 8)));   // highbyte
-  this->write(((uint8_t) ((crc16) &0xff)));  // lowbyte
+  // this->write(((uint8_t) ((crc16) >> 8)));   // highbyte
+  // this->write(((uint8_t) ((crc16) &0xff)));  // lowbyte
   // end Byte
-  this->write(0x0D);
+  // this->write(0x0D);
   ESP_LOGD(TAG, "Sending polling command : %s with length %d",
            this->used_polling_commands_[this->last_polling_command_].command,
            this->used_polling_commands_[this->last_polling_command_].length);
@@ -871,7 +914,15 @@ void Pipsolar::dump_config() {
 }
 void Pipsolar::update() {}
 
-void Pipsolar::add_polling_command_(const char *command, ENUMPollingCommand polling_command) {
+void Pipsolar::add_polling_command_(const char *command_, ENUMPollingCommand polling_command) {
+  char *command = strdup(command_);
+  ESP_LOGD(TAG, "add_polling_command_ %s", command);
+  if (strcmp("QPIGS", command) == 0) {
+    strcpy(command, "^P003GS\r");
+    polling_command = POLLING_17GS;
+  } else if (strcmp("ET", command) == 0) {
+    strcpy(command, "^P003ET\r");
+  }
   for (auto &used_polling_command : this->used_polling_commands_) {
     if (used_polling_command.length == strlen(command)) {
       uint8_t len = strlen(command);
