@@ -188,7 +188,7 @@ TYPES = {
     CONF_GRID_FREQUENCY: sensor.sensor_schema(
         unit_of_measurement=UNIT_HERTZ,
         icon=ICON_CURRENT_AC,
-        accuracy_decimals=1,
+        accuracy_decimals=2,
     ),
     CONF_AC_OUTPUT_VOLTAGE: sensor.sensor_schema(
         unit_of_measurement=UNIT_VOLT,
