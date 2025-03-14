@@ -178,6 +178,24 @@ void Pipsolar::loop() {
         }
         this->state_ = STATE_IDLE;
         break;
+      case POLLING_PS17:
+        if (this->pv_power1_) {
+          this->pv_power1_->publish_state(value_pv_power1_);
+        }
+        if (this->pv_power2_) {
+          this->pv_power2_->publish_state(value_pv_power2_);
+        }
+        if (this->battery_power_) {
+          this->battery_power_->publish_state(value_battery_power_);
+        }
+        if (this->battery_power_) {
+          this->battery_power_->publish_state(value_battery_power_);
+        }
+        if (this->ac_input_total_active_power_) {
+          this->ac_input_total_active_power_->publish_state(value_ac_input_total_active_power_);
+        }
+        this->state_ = STATE_IDLE;
+        break;
       case POLLING_ET:
         if (value_energy_ > 0 && this->energy_) {
           this->energy_->publish_state(value_energy_);
@@ -774,6 +792,33 @@ void Pipsolar::loop() {
         }
         this->state_ = STATE_POLL_DECODED;
       } break;
+      case POLLING_PS17: {
+        ESP_LOGD(TAG, "Decode PS %s", tmp);
+        char *string, *found;
+        string = tmp + 5;  // skip header
+        int i = 1;
+        while ((found = strsep(&string, ",")) != NULL) {
+          switch (i) {
+            case 1:
+              value_pv_power1_ = atoi(found);
+              break;
+            case 2:
+              value_pv_power2_ = atoi(found);
+              break;
+            case 3:
+              value_battery_power_ = atoi(found);
+              break;
+            case 7:
+              value_ac_input_total_active_power_ = atoi(found);
+              break;
+            default:
+              break;
+          }
+          // ESP_LOGD(TAG, "parsing %i=%i",i,atoi(found));
+          i++;
+        }
+        this->state_ = STATE_POLL_DECODED;
+      } break;
       default:
         this->state_ = STATE_IDLE;
         break;
@@ -960,6 +1005,8 @@ void Pipsolar::add_polling_command_(const char *command_, ENUMPollingCommand pol
     polling_command = POLLING_17GS;
   } else if (strcmp("ET", command) == 0) {
     strcpy(command, "^P003ET\r");
+  } else if (strcmp("PS17", command) == 0) {
+    strcpy(command, "^P003PS\r");
   }
   for (auto &used_polling_command : this->used_polling_commands_) {
     if (used_polling_command.length == strlen(command)) {
