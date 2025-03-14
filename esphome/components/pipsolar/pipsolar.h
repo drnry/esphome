@@ -21,7 +21,7 @@ enum ENUMPollingCommand {
   POLLING_QMN = 6,
   POLLING_17GS = 7,
   POLLING_ET = 8,
-  POLLING_PS = 9,
+  POLLING_PS17 = 9,
 };
 struct PollingCommand {
   uint8_t *command;
@@ -57,6 +57,18 @@ struct PollingCommand {
 class Pipsolar : public uart::UARTDevice, public PollingComponent {
   // ET total generated energy
   PIPSOLAR_SENSOR(energy, ET, int);
+  // GS General status
+  PIPSOLAR_SENSOR(pv_voltage1, QPIGS, float)
+  PIPSOLAR_SENSOR(pv_voltage2, QPIGS, float)
+  PIPSOLAR_SENSOR(pv_current1, QPIGS, float)
+  PIPSOLAR_SENSOR(pv_current2, QPIGS, float)
+  PIPSOLAR_SENSOR(component_max_temp, QPIGS, int)
+  // PS Power status
+  PIPSOLAR_SENSOR(pv_power1, PS17, int)
+  PIPSOLAR_SENSOR(pv_power2, PS17, int)
+  PIPSOLAR_SENSOR(battery_power, PS17, int)
+  PIPSOLAR_SENSOR(ac_input_total_active_power, PS17, int)
+
   // QPIGS values
   PIPSOLAR_SENSOR(grid_voltage, QPIGS, float)
   PIPSOLAR_SENSOR(grid_frequency, QPIGS, float)
@@ -189,6 +201,7 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   void loop() override;
   void dump_config() override;
   void update() override;
+  void set_bms_soc(sensor::Sensor *bms_soc) { this->bms_soc_ = bms_soc; }
 
  protected:
   static const size_t PIPSOLAR_READ_BUFFER_LENGTH = 255;  // maximum supported answer length
@@ -222,6 +235,8 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
 
   uint8_t last_polling_command_ = 0;
   PollingCommand used_polling_commands_[15];
+  sensor::Sensor *bms_volt_{nullptr};
+  sensor::Sensor *bms_soc_{nullptr};
 };
 
 }  // namespace pipsolar

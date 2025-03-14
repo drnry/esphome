@@ -68,6 +68,11 @@ void Pipsolar::loop() {
   }
 
   if (this->state_ == STATE_POLL_DECODED) {
+    if (this->bms_soc_) {
+      ESP_LOGD(TAG, "SOC %f", this->bms_soc_->raw_state);
+    } else {
+      ESP_LOGD(TAG, "SOC NULL");
+    }
     std::string mode;
     switch (this->used_polling_commands_[this->last_polling_command_].identifier) {
       case POLLING_QPIRI:
@@ -174,15 +179,30 @@ void Pipsolar::loop() {
         this->state_ = STATE_IDLE;
         break;
       case POLLING_ET:
-        if (this->energy_) {
+        if (value_energy_ > 0 && this->energy_) {
           this->energy_->publish_state(value_energy_);
         }
         this->state_ = STATE_IDLE;
         break;
       case POLLING_QPIGS:
       case POLLING_17GS:
+        if (this->pv_voltage1_) {
+          this->pv_voltage1_->publish_state(value_pv_voltage1_);
+        }
+        if (this->pv_voltage2_) {
+          this->pv_voltage2_->publish_state(value_pv_voltage2_);
+        }
+        if (this->pv_current1_) {
+          this->pv_current1_->publish_state(value_pv_current1_);
+        }
+        if (this->pv_current2_) {
+          this->pv_current2_->publish_state(value_pv_current2_);
+        }
         if (this->grid_voltage_) {
           this->grid_voltage_->publish_state(value_grid_voltage_);
+        }
+        if (this->component_max_temp_) {
+          this->component_max_temp_->publish_state(value_component_max_temp_);
         }
         if (this->grid_frequency_) {
           this->grid_frequency_->publish_state(value_grid_frequency_);
@@ -707,8 +727,26 @@ void Pipsolar::loop() {
         int i = 1;
         while ((found = strsep(&string, ",")) != NULL) {
           switch (i) {
+            case 1:
+              this->value_pv_voltage1_ = atoi(found) * 0.1f;
+              break;
+            case 2:
+              this->value_pv_voltage2_ = atoi(found) * 0.1f;
+              break;
+            case 3:
+              this->value_pv_current1_ = atoi(found) * 0.01f;
+              break;
+            case 4:
+              this->value_pv_current2_ = atoi(found) * 0.01f;
+              break;
+            case 11:
+              this->value_grid_frequency_ = atof(found) * 0.01f;
+              break;
             case 22:
-              value_inverter_heat_sink_temperature_ = atoi(found);
+              this->value_inverter_heat_sink_temperature_ = atoi(found);
+              break;
+            case 23:
+              this->value_component_max_temp_ = atoi(found);
               break;
             default:
               break;

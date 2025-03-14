@@ -73,6 +73,9 @@ CONF_BATTERY_VOLTAGE_OFFSET_FOR_FANS_ON = "battery_voltage_offset_for_fans_on"
 CONF_EEPROM_VERSION = "eeprom_version"
 CONF_PV_CHARGING_POWER = "pv_charging_power"
 CONF_ENERGY = "energy"
+CONF_BMS_VOLT = "bms_volt"
+CONF_BMS_SOC = "bms_soc"
+
 
 TYPES = {
     CONF_GRID_RATING_VOLTAGE: sensor.sensor_schema(
@@ -231,7 +234,12 @@ TYPES = {
     ),
     CONF_INVERTER_HEAT_SINK_TEMPERATURE: sensor.sensor_schema(
         unit_of_measurement=UNIT_CELSIUS,
-        accuracy_decimals=1,
+        # accuracy_decimals=1,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+    ),
+    "component_max_temp": sensor.sensor_schema(
+        unit_of_measurement=UNIT_CELSIUS,
+        # accuracy_decimals=1,
         device_class=DEVICE_CLASS_TEMPERATURE,
     ),
     CONF_PV_INPUT_CURRENT_FOR_BATTERY: sensor.sensor_schema(
@@ -271,6 +279,32 @@ TYPES = {
         unit_of_measurement=UNIT_KILOWATT_HOURS,
         device_class=DEVICE_CLASS_ENERGY,
         state_class=STATE_CLASS_TOTAL_INCREASING,
+    ),
+    CONF_BMS_VOLT: sensor.sensor_schema(
+        accuracy_decimals=1,
+    ),
+    CONF_BMS_SOC: sensor.sensor_schema(
+        accuracy_decimals=1,
+    ),
+    "pv_voltage1": sensor.sensor_schema(
+        unit_of_measurement=UNIT_VOLT,
+        accuracy_decimals=1,
+        device_class=DEVICE_CLASS_VOLTAGE,
+    ),
+    "pv_voltage2": sensor.sensor_schema(
+        unit_of_measurement=UNIT_VOLT,
+        accuracy_decimals=1,
+        device_class=DEVICE_CLASS_VOLTAGE,
+    ),
+    "pv_current1": sensor.sensor_schema(
+        unit_of_measurement=UNIT_AMPERE,
+        accuracy_decimals=2,
+        device_class=DEVICE_CLASS_CURRENT,
+    ),
+    "pv_current2": sensor.sensor_schema(
+        unit_of_measurement=UNIT_AMPERE,
+        accuracy_decimals=2,
+        device_class=DEVICE_CLASS_CURRENT,
     ),
 }
 
