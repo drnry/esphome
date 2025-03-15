@@ -202,6 +202,13 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   void dump_config() override;
   void update() override;
   void set_bms_soc(sensor::Sensor *bms_soc) { this->bms_soc_ = bms_soc; }
+  void set_bms_volt(sensor::Sensor *bms_volt) { this->bms_volt_ = bms_volt; }
+  void set_bms_chargevoltage(sensor::Sensor *bms_chargevoltage) { this->bms_chargevoltage_ = bms_chargevoltage; }
+  void set_bms_chargelimit(sensor::Sensor *bms_chargelimit) { this->bms_chargelimit_ = bms_chargelimit; }
+  void set_bms_stopdischarge(sensor::Sensor *bms_stopdischarge) { this->bms_stopdischarge_ = bms_stopdischarge; }
+  void set_bms_stopcharge(sensor::Sensor *bms_stopcharge) { this->bms_stopcharge_ = bms_stopcharge; }
+  void set_bms_dischargelimit(sensor::Sensor *bms_dischargelimit) { this->bms_dischargelimit_ = bms_dischargelimit; }
+  void bms_update(float);
 
  protected:
   static const size_t PIPSOLAR_READ_BUFFER_LENGTH = 255;  // maximum supported answer length
@@ -235,8 +242,14 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
 
   uint8_t last_polling_command_ = 0;
   PollingCommand used_polling_commands_[15];
+  // BMS sensors
   sensor::Sensor *bms_volt_{nullptr};
   sensor::Sensor *bms_soc_{nullptr};
+  sensor::Sensor *bms_chargevoltage_{nullptr};
+  sensor::Sensor *bms_chargelimit_{nullptr};
+  sensor::Sensor *bms_stopdischarge_{nullptr};
+  sensor::Sensor *bms_stopcharge_{nullptr};
+  sensor::Sensor *bms_dischargelimit_{nullptr};
 };
 
 }  // namespace pipsolar

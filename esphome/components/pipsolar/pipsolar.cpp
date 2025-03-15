@@ -7,9 +7,61 @@ namespace pipsolar {
 
 static const char *const TAG = "pipsolar";
 
+using std::isnan;
+
+void Pipsolar::bms_update(float f) {
+  // char bms_msg[127] = "^D054BMS0422,078,0,0000,0,0,0480,0525,0420,1,0,0450,0000";
+  // const int bms_msg_len = strlen(bms_msg);
+  if (!this->bms_soc_ || !this->bms_volt_ || !this->bms_chargevoltage_ || !this->bms_chargelimit_ ||
+      !this->bms_stopdischarge_ || !this->bms_stopcharge_ || !this->bms_dischargelimit_) {
+    ESP_LOGD(TAG, "BMS Sensor missing");
+    return;
+  }
+  if (isnan(this->bms_volt_->raw_state) || isnan(this->bms_soc_->raw_state) ||
+      isnan(this->bms_chargevoltage_->raw_state) || isnan(this->bms_chargelimit_->raw_state) ||
+      isnan(this->bms_stopdischarge_->raw_state) || isnan(this->bms_stopcharge_->raw_state) ||
+      isnan(this->bms_dischargelimit_->raw_state)) {
+    ESP_LOGD(TAG, "BMS Sensor NaN %f %f %f %f %f %f %f", this->bms_volt_->raw_state, this->bms_soc_->raw_state,
+             this->bms_chargevoltage_->raw_state, this->bms_chargelimit_->raw_state,
+             this->bms_stopdischarge_->raw_state, this->bms_stopcharge_->raw_state,
+             this->bms_dischargelimit_->raw_state);
+    return;
+  }
+
+  int volt = this->bms_volt_->raw_state * 10;
+  int soc = this->bms_soc_->raw_state;
+  int cd = 0;   // charge/discharge
+  int cur = 0;  // current
+  int warning = 0;
+  int fc = 0;  // force charge
+  int volt_cv = this->bms_chargevoltage_->raw_state * 10;
+  int volt_float = 525;
+  int cur_max_ch = this->bms_chargelimit_->raw_state * 10;
+  int stopdis = this->bms_stopdischarge_->raw_state;
+  int stopch = this->bms_stopcharge_->raw_state;
+  int volt_cutoff = 450;
+  int cur_max_dis = this->bms_dischargelimit_->raw_state * 10;
+
+  char bms_msg[127];
+  snprintf(bms_msg, sizeof(bms_msg), "^D054BMS%04i,%03i,%01i,%04i,%01i,%01i,%04i,%04i,%04i,%01i,%01i,%04i,%04i", volt,
+           soc, cd, cur, warning, fc, volt_cv, volt_float, cur_max_ch, stopdis, stopch, volt_cutoff, cur_max_dis);
+  const int bms_msg_len = strlen(bms_msg);
+  uint16_t crc = crc16be((uint8_t *) bms_msg, bms_msg_len);
+  bms_msg[bms_msg_len] = crc >> 8;
+  bms_msg[bms_msg_len + 1] = crc & 0xff;
+  bms_msg[bms_msg_len + 2] = '\0';
+  ESP_LOGD(TAG, "bms2 soc update foo len %i", bms_msg_len);  // 56
+  switch_command(bms_msg);
+  // switch_command("^P004BMS");
+  // switch_command("^D054BMS0422,078,0,0000,0,0,0480,0525,0420,1,0,0450,0000\xedw");
+}
+
 void Pipsolar::setup() {
   this->state_ = STATE_IDLE;
   this->command_start_millis_ = 0;
+  if (this->bms_soc_) {
+    this->bms_soc_->add_on_raw_state_callback(std::bind(&Pipsolar::bms_update, this, std::placeholders::_1));
+  }
 }
 
 void Pipsolar::empty_uart_buffer_() {
@@ -184,9 +236,6 @@ void Pipsolar::loop() {
         }
         if (this->pv_power2_) {
           this->pv_power2_->publish_state(value_pv_power2_);
-        }
-        if (this->battery_power_) {
-          this->battery_power_->publish_state(value_battery_power_);
         }
         if (this->battery_power_) {
           this->battery_power_->publish_state(value_battery_power_);
@@ -918,22 +967,22 @@ uint8_t Pipsolar::send_next_command_() {
   uint16_t crc16;
   if (!this->command_queue_[this->command_queue_position_].empty()) {
     const char *command = this->command_queue_[this->command_queue_position_].c_str();
-    uint8_t byte_command[16];
+    uint8_t byte_command[64];
     uint8_t length = this->command_queue_[this->command_queue_position_].length();
     for (uint8_t i = 0; i < length; i++) {
       byte_command[i] = (uint8_t) this->command_queue_[this->command_queue_position_].at(i);
     }
-    this->state_ = STATE_COMMAND;
+    this->state_ = STATE_COMMAND_COMPLETE;  // hack: bms command does not send ack/nack
     this->command_start_millis_ = millis();
     this->empty_uart_buffer_();
     this->read_pos_ = 0;
     crc16 = this->pipsolar_crc_(byte_command, length);
     this->write_str(command);
     // checksum
-    this->write(((uint8_t) ((crc16) >> 8)));   // highbyte
-    this->write(((uint8_t) ((crc16) &0xff)));  // lowbyte
+    // this->write(((uint8_t) ((crc16) >> 8)));   // highbyte
+    // this->write(((uint8_t) ((crc16) &0xff)));  // lowbyte
     // end Byte
-    this->write(0x0D);
+    this->write('\r');
     ESP_LOGD(TAG, "Sending command from queue: %s with length %d", command, length);
     return 1;
   }
