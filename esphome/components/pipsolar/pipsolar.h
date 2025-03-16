@@ -208,7 +208,9 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   void set_bms_stopdischarge(sensor::Sensor *bms_stopdischarge) { this->bms_stopdischarge_ = bms_stopdischarge; }
   void set_bms_stopcharge(sensor::Sensor *bms_stopcharge) { this->bms_stopcharge_ = bms_stopcharge; }
   void set_bms_dischargelimit(sensor::Sensor *bms_dischargelimit) { this->bms_dischargelimit_ = bms_dischargelimit; }
+  void set_eminfo(sensor::Sensor *eminfo) { this->eminfo_ = eminfo; }
   void bms_update(float);
+  void eminfo_update(float);
 
  protected:
   static const size_t PIPSOLAR_READ_BUFFER_LENGTH = 255;  // maximum supported answer length
@@ -250,6 +252,8 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   sensor::Sensor *bms_stopdischarge_{nullptr};
   sensor::Sensor *bms_stopcharge_{nullptr};
   sensor::Sensor *bms_dischargelimit_{nullptr};
+  // Energy meter info
+  sensor::Sensor *eminfo_{nullptr};
 };
 
 }  // namespace pipsolar

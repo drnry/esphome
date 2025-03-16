@@ -285,6 +285,7 @@ TYPES = {
     "bms_stopdischarge": sensor.sensor_schema(),
     "bms_stopcharge": sensor.sensor_schema(),
     "bms_dischargelimit": sensor.sensor_schema(),
+    "eminfo": sensor.sensor_schema(),
     "pv_voltage1": sensor.sensor_schema(
         unit_of_measurement=UNIT_VOLT,
         accuracy_decimals=1,
