@@ -64,7 +64,7 @@ void Pipsolar::eminfo_update(float f) {
   int maxfeed = 10000;  // TODO: add sensor
   int dir = f > 0 ? 1 : 0;
   char eminfo_msg[127];
-  snprintf(eminfo_msg, sizeof(eminfo_msg), "^S026EMINFO00000,%05i,%01i,%05i", maxfeed, dir, abs(f));
+  snprintf(eminfo_msg, sizeof(eminfo_msg), "^S026EMINFO00000,%05i,%01i,%05i", maxfeed, dir, abs((int) f));
   switch_command(eminfo_msg);
 }
 
