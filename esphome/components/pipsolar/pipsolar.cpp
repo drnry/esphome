@@ -1031,7 +1031,7 @@ void Pipsolar::send_next_poll_() {
   // this->write(((uint8_t) ((crc16) >> 8)));   // highbyte
   // this->write(((uint8_t) ((crc16) &0xff)));  // lowbyte
   // end Byte
-  // this->write(0x0D);
+  this->write('\r');
   ESP_LOGD(TAG, "Sending polling command : %s with length %d",
            this->used_polling_commands_[this->last_polling_command_].command,
            this->used_polling_commands_[this->last_polling_command_].length);
@@ -1070,12 +1070,12 @@ void Pipsolar::add_polling_command_(const char *command_, ENUMPollingCommand pol
   char *command = strdup(command_);
   ESP_LOGD(TAG, "add_polling_command_ %s", command);
   if (strcmp("QPIGS", command) == 0) {
-    strcpy(command, "^P003GS\r");
+    strcpy(command, "^P003GS");
     polling_command = POLLING_17GS;
   } else if (strcmp("ET", command) == 0) {
-    strcpy(command, "^P003ET\r");
+    strcpy(command, "^P003ET");
   } else if (strcmp("PS17", command) == 0) {
-    strcpy(command, "^P003PS\r");
+    strcpy(command, "^P003PS");
   }
   for (auto &used_polling_command : this->used_polling_commands_) {
     if (used_polling_command.length == strlen(command)) {
