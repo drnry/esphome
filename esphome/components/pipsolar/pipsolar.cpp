@@ -135,11 +135,6 @@ void Pipsolar::loop() {
   }
 
   if (this->state_ == STATE_POLL_DECODED) {
-    if (this->bms_soc_) {
-      ESP_LOGD(TAG, "SOC %f", this->bms_soc_->raw_state);
-    } else {
-      ESP_LOGD(TAG, "SOC NULL");
-    }
     std::string mode;
     switch (this->used_polling_commands_[this->last_polling_command_].identifier) {
       case POLLING_QPIRI:
@@ -537,6 +532,11 @@ void Pipsolar::loop() {
     std::string fc;
     char tmp[PIPSOLAR_READ_BUFFER_LENGTH];
     sprintf(tmp, "%s", this->read_buffer_);
+    if (strnlen(tmp, sizeof(tmp)) < 6) {  // fixme: hack for broke reply
+      ESP_LOGD(TAG, "discarding too short reply");
+      this->state_ = STATE_IDLE;
+      return;
+    }
     switch (this->used_polling_commands_[this->last_polling_command_].identifier) {
       case POLLING_QPIRI:
         ESP_LOGD(TAG, "Decode QPIRI");
@@ -892,8 +892,13 @@ void Pipsolar::loop() {
 
   if (this->state_ == STATE_POLL_COMPLETE) {
     if (this->check_incoming_crc_()) {
-      if (this->read_buffer_[0] == '(' && this->read_buffer_[1] == 'N' && this->read_buffer_[2] == 'A' &&
-          this->read_buffer_[3] == 'K') {
+      if (this->read_buffer_[0] == '^' && this->read_buffer_[1] == '0') {  // NAK
+        ESP_LOGD(TAG, "got NAK");
+        this->state_ = STATE_IDLE;
+        return;
+      }
+      if (this->read_buffer_[0] == '^' && this->read_buffer_[1] == '1') {  // ACK
+        ESP_LOGD(TAG, "got ACK");
         this->state_ = STATE_IDLE;
         return;
       }
