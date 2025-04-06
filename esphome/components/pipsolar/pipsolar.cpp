@@ -31,7 +31,7 @@ void Pipsolar::bms_update(float f) {
   int volt = this->bms_volt_->raw_state * 10;
   int soc = this->bms_soc_->raw_state;
   int cd = (this->bms_current_->raw_state) > 0 ? 0 : 1;  // charge/discharge
-  int cur = this->bms_current_->raw_state * 10;  // current
+  int cur = this->bms_current_->raw_state;  // current
   int warning = 0;
   int fc = 0;  // force charge
   int volt_cv = this->bms_chargevoltage_->raw_state * 10;
