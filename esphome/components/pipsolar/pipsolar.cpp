@@ -20,11 +20,11 @@ void Pipsolar::bms_update(float f) {
   if (isnan(this->bms_volt_->raw_state) || isnan(this->bms_soc_->raw_state) ||
       isnan(this->bms_chargevoltage_->raw_state) || isnan(this->bms_chargelimit_->raw_state) ||
       isnan(this->bms_stopdischarge_->raw_state) || isnan(this->bms_stopcharge_->raw_state) ||
-      isnan(this->bms_dischargelimit_->raw_state)) {
+      isnan(this->bms_dischargelimit_->raw_state) || isnan(this->bms_current_->raw_state)) {
     ESP_LOGD(TAG, "BMS Sensor NaN %f %f %f %f %f %f %f", this->bms_volt_->raw_state, this->bms_soc_->raw_state,
              this->bms_chargevoltage_->raw_state, this->bms_chargelimit_->raw_state,
              this->bms_stopdischarge_->raw_state, this->bms_stopcharge_->raw_state,
-             this->bms_dischargelimit_->raw_state);
+             this->bms_dischargelimit_->raw_state, this->bms_current_->raw_state);
     return;
   }
 
