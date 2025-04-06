@@ -36,7 +36,7 @@ void Pipsolar::bms_update(float f) {
   int fc = 0;  // force charge
   int volt_cv = this->bms_chargevoltage_->raw_state * 10;
   int volt_float = 570;
-  int cur_max_ch = this->bms_chargelimit_->raw_state;
+  int cur_max_ch = this->bms_chargelimit_->raw_state * 10;
   int stopdis = this->bms_stopdischarge_->raw_state;
   int stopch = this->bms_stopcharge_->raw_state;
   int volt_cutoff = 430;
