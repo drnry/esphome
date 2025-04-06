@@ -30,8 +30,8 @@ void Pipsolar::bms_update(float f) {
 
   int volt = this->bms_volt_->raw_state * 10;
   int soc = this->bms_soc_->raw_state;
-  int cd = 0;   // charge/discharge
-  int cur = 0;  // current
+  int cd = (this->bms_current_->raw_state) > 0 ? 1 : 0;  // charge/discharge
+  int cur = this->bms_current_->raw_state;  // current
   int warning = 0;
   int fc = 0;  // force charge
   int volt_cv = this->bms_chargevoltage_->raw_state * 10;
@@ -44,7 +44,7 @@ void Pipsolar::bms_update(float f) {
 
   char bms_msg[127];
   snprintf(bms_msg, sizeof(bms_msg), "^D054BMS%04i,%03i,%01i,%04i,%01i,%01i,%04i,%04i,%04i,%01i,%01i,%04i,%04i", volt,
-           soc, cd, cur, warning, fc, volt_cv, volt_float, cur_max_ch, stopdis, stopch, volt_cutoff, cur_max_dis);
+           soc, cd, abs((int) cur), warning, fc, volt_cv, volt_float, cur_max_ch, stopdis, stopch, volt_cutoff, cur_max_dis);
   const int bms_msg_len = strlen(bms_msg);
   uint16_t crc = crc16be((uint8_t *) bms_msg, bms_msg_len);
   bms_msg[bms_msg_len] = crc >> 8;
