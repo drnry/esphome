@@ -43,7 +43,7 @@ void Pipsolar::bms_update(float f) {
   int cur_max_dis = this->bms_dischargelimit_->raw_state;
 
   char bms_msg[127];
-  snprintf(bms_msg, sizeof(bms_msg), "^D054BMS%04i,%03i,%01i,%04i,%02i,%01i,%04i,%04i,%04i,%01i,%01i,%04i,%04i", volt,
+  snprintf(bms_msg, sizeof(bms_msg), "^D054BMS%04i,%03i,%01i,%04i,%01i,%01i,%04i,%04i,%04i,%01i,%01i,%04i,%04i", volt,
            soc, cd, abs((int) cur), warning, fc, volt_cv, volt_float, cur_max_ch, stopdis, stopch, volt_cutoff, cur_max_dis);
   const int bms_msg_len = strlen(bms_msg);
   uint16_t crc = crc16be((uint8_t *) bms_msg, bms_msg_len);
