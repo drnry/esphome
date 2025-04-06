@@ -281,6 +281,7 @@ TYPES = {
     ),
     "bms_volt": sensor.sensor_schema(),
     "bms_soc": sensor.sensor_schema(),
+    "bms_current": sensor.sensor_schema(),
     "bms_chargelimit": sensor.sensor_schema(),
     "bms_chargevoltage": sensor.sensor_schema(),
     "bms_stopdischarge": sensor.sensor_schema(),
