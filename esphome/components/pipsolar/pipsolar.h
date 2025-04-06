@@ -203,6 +203,7 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   void update() override;
   void set_bms_soc(sensor::Sensor *bms_soc) { this->bms_soc_ = bms_soc; }
   void set_bms_volt(sensor::Sensor *bms_volt) { this->bms_volt_ = bms_volt; }
+  void set_bms_current(sensor::Sensor *bms_current) { this->bms_current_ = bms_current; }
   void set_bms_chargevoltage(sensor::Sensor *bms_chargevoltage) { this->bms_chargevoltage_ = bms_chargevoltage; }
   void set_bms_chargelimit(sensor::Sensor *bms_chargelimit) { this->bms_chargelimit_ = bms_chargelimit; }
   void set_bms_stopdischarge(sensor::Sensor *bms_stopdischarge) { this->bms_stopdischarge_ = bms_stopdischarge; }
@@ -246,6 +247,7 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PollingCommand used_polling_commands_[15];
   // BMS sensors
   sensor::Sensor *bms_volt_{nullptr};
+  sensor::Sensor *bms_current_{nullptr};
   sensor::Sensor *bms_soc_{nullptr};
   sensor::Sensor *bms_chargevoltage_{nullptr};
   sensor::Sensor *bms_chargelimit_{nullptr};
