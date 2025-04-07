@@ -30,7 +30,7 @@ void Pipsolar::bms_update(float f) {
 
   int volt = this->bms_volt_->raw_state * 10;
   int soc = this->bms_soc_->raw_state;
-  int cd = (this->bms_current_->raw_state) > 0 ? 1 : 0;  // charge/discharge
+  int cd = (this->bms_current_->raw_state) > 0 ? 0 : 1;  // charge/discharge
   int cur = this->bms_current_->raw_state;  // current
   int warning = 0;
   int fc = 0;  // force charge
@@ -61,7 +61,7 @@ void Pipsolar::eminfo_update(float f) {
     ESP_LOGD(TAG, "eminfo Sensor NaN");
     return;
   }
-  int maxfeed = 12000;  // TODO: add sensor //value makes no difference?
+  int maxfeed = 0;  // TODO: add sensor //value makes no difference?
   int dir = f > 0 ? 1 : 0;
   char eminfo_msg[127];
   snprintf(eminfo_msg, sizeof(eminfo_msg), "^S026EMINFO00000,%05i,%01i,%05i", maxfeed, dir, abs((int) f));
