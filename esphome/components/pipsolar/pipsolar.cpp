@@ -872,7 +872,7 @@ void Pipsolar::loop() {
             case 3:
               value_battery_power_ = atoi(found);
               break;
-            case 6:
+            case 7:
               value_ac_input_total_active_power_ = atoi(found);
               break;
             default:
